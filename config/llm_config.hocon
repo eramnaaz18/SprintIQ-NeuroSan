@@ -1,0 +1,21 @@
+{
+    "llm_config" {
+
+        "class": "langchain_mistralai.chat_models.ChatMistralAI",
+        "model_name": "mistral-medium-latest",
+        "temperature": 0,
+
+        "fallbacks": [
+            {
+                "class": "langchain_mistralai.chat_models.ChatMistralAI",
+                "model_name": "mistral-small-latest",
+                "temperature": 0
+            },
+            {
+                "class": "langchain_mistralai.chat_models.ChatMistralAI",
+                "model_name": "open-mistral-nemo",
+                "temperature": 0
+            }
+        ]
+    }
+}

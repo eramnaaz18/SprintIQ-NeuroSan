@@ -1,0 +1,74 @@
+{
+  include "../config/llm_config.hocon",
+
+  "tools":[
+
+    {
+      "name":"EstimationAgent",
+
+      "function": {
+
+        "description":"Estimate Jira story points",
+
+        "parameters":{
+          "type":"object",
+
+          "properties":{
+
+            "issue_key":{
+              "type":"string",
+              "description":"Jira issue key"
+            },
+
+            "story_analysis":{
+              "type":"string",
+              "description":"Story analysis output"
+            },
+
+            "historical_analysis":{
+              "type":"string",
+              "description":"Historical analysis output"
+            }
+
+          },
+
+          "required":[
+            "story_analysis"
+          ]
+        }
+
+      },
+
+
+      "instructions":"""
+      
+      You are SprintIQ Estimation Agent.
+
+      Analyze the provided Jira story.
+
+      Consider:
+
+      - Complexity
+      - Development effort
+      - Dependencies
+      - Acceptance criteria
+      - Historical context
+
+      Do not create risks.
+      Do not modify story analysis.
+
+      Return JSON only.
+
+      {
+        "story_points":0,
+        "reasoning":"",
+        "assumptions":[]
+      }
+
+      """
+
+    }
+
+  ]
+
+}

@@ -1,0 +1,16 @@
+DEFAULT_JIRA_PROFILE = "SCRUM_MASTER"
+
+REQUEST_TIMEOUT = 30
+
+JIRA_API_VERSION = "3"
+
+VERIFY_SSL = True
+
+FIBONACCI = [
+    1,
+    2,
+    3,
+    5,
+    8,
+    13
+]

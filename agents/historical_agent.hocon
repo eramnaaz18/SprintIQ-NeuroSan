@@ -1,0 +1,192 @@
+{
+    include "../config/llm_config.hocon",
+
+    "tools":[
+
+        {
+            "name":"HistoricalAgent",
+
+            "function": {
+
+                "description":"Finds similar completed Jira stories and historical delivery information.",
+
+                "parameters":{
+
+                    "type":"object",
+
+                    "properties":{
+
+                        "issue_key":{
+
+                            "type":"string",
+
+                            "description":"Jira issue key such as ESS-11"
+
+                        },
+
+                        "story_analysis":{
+
+                            "type":"string",
+
+                            "description":"Optional StoryAnalysisAgent output"
+
+                        }
+
+                    },
+
+                    "required":[
+
+                        "issue_key"
+
+                    ]
+
+                }
+
+            },
+
+
+            "instructions":"""
+
+You are SprintIQ Historical Analysis Agent.
+
+==================================================
+INPUT HANDLING
+==================================================
+
+You can receive:
+
+Direct input:
+
+{
+  "issue_key":"ESS-11"
+}
+
+OR Planner input:
+
+{
+  "issue_key":"ESS-11",
+  "story_analysis":{}
+}
+
+Extract issue_key.
+
+If issue_key is missing:
+
+Return:
+
+{
+  "issue_key":"",
+  "similar_stories":[],
+  "historical_estimates":[],
+  "observations":[
+    "Missing Jira issue key"
+  ],
+  "confidence":"0"
+}
+
+==================================================
+EXECUTION
+==================================================
+
+If story_analysis exists:
+
+Use it as context.
+
+Otherwise:
+
+Call JiraIssueTool.
+
+Input:
+
+{
+  "issue_key":"<issue_key>"
+}
+
+Wait for Jira response before analysis.
+
+==================================================
+ANALYSIS
+==================================================
+
+Analyze:
+
+- Similar completed stories
+- Previous estimates
+- Delivery patterns
+- Complexity comparison
+- Historical implementation trends
+
+==================================================
+RULES
+==================================================
+
+Do not invent historical data.
+
+Do not create estimates.
+
+Do not identify risks.
+
+Use only available Jira or historical information.
+
+==================================================
+OUTPUT
+==================================================
+
+Return JSON only.
+
+{
+  "issue_key":"",
+  "similar_stories":[],
+  "historical_estimates":[],
+  "observations":[],
+  "confidence":""
+}
+
+""",
+
+            "tools":[
+                "JiraIssueTool"
+            ]
+
+        },
+
+        {
+            "name":"JiraIssueTool",
+
+            "function":{
+
+                "description":"Fetch Jira issue",
+
+                "parameters":{
+
+                    "type":"object",
+
+                    "properties":{
+
+                        "issue_key":{
+
+                            "type":"string",
+
+                            "description":"Jira issue key"
+
+                        }
+
+                    },
+
+                    "required":[
+
+                        "issue_key"
+
+                    ]
+
+                }
+
+            },
+
+            "class":"coded_tools.jira.jira_issue_tool.JiraIssueTool"
+
+        }
+
+    ]
+
+}

@@ -1,0 +1,221 @@
+{
+    include "../config/llm_config.hocon",
+
+    "tools":[
+
+        {
+            "name":"RiskAgent",
+
+            "function": {
+
+                "description":"Identifies implementation and delivery risks.",
+
+                "parameters":{
+
+                    "type":"object",
+
+                    "properties":{
+
+                        "issue_key":{
+
+                            "type":"string",
+
+                            "description":"Jira issue key such as ESS-19"
+
+                        },
+
+                        "story_analysis":{
+
+                            "type":"string",
+
+                            "description":"Story analysis output from StoryAnalysisAgent"
+
+                        }
+
+                    },
+
+                    "required":[
+
+                        "issue_key"
+
+                    ]
+
+                }
+
+            },
+
+
+            "instructions":"""
+
+You are SprintIQ Risk Agent.
+
+
+==================================================
+INPUT HANDLING
+==================================================
+
+
+You receive:
+
+
+{
+  "issue_key":"",
+  "story_analysis":{}
+}
+
+
+
+Validate issue_key.
+
+
+
+If issue_key is missing:
+
+
+Return:
+
+
+{
+  "issue_key":"",
+  "risks":[],
+  "severity":"",
+  "mitigation":[],
+  "dependencies":[],
+  "error":"Missing issue key"
+}
+
+
+
+==================================================
+STORY ANALYSIS HANDLING
+==================================================
+
+
+If story_analysis exists:
+
+
+Use it as the primary source.
+
+
+
+Otherwise:
+
+
+Call JiraIssueTool.
+
+
+
+Input:
+
+
+{
+  "issue_key":"<issue_key>"
+}
+
+
+
+Wait for Jira response before identifying risks.
+
+
+
+==================================================
+RISK ANALYSIS
+==================================================
+
+
+Identify only from available Jira/story data:
+
+
+- Technical risks
+- Business risks
+- Testing risks
+- Deployment risks
+- Dependency risks
+
+
+
+==================================================
+RULES
+==================================================
+
+
+Do not invent risks.
+
+Do not assume missing information.
+
+Do not estimate story points.
+
+Do not modify Jira.
+
+
+
+==================================================
+OUTPUT
+==================================================
+
+
+Return JSON only:
+
+
+{
+  "issue_key":"",
+  "risks":[],
+  "severity":"",
+  "mitigation":[],
+  "dependencies":[]
+}
+
+
+""",
+
+
+            "tools":[
+
+                "JiraIssueTool"
+
+            ]
+
+        },
+
+
+        {
+            "name":"JiraIssueTool",
+
+            "function":{
+
+                "description":"Fetch Jira issue",
+
+                "parameters":{
+
+                    "type":"object",
+
+                    "properties":{
+
+                        "issue_key":{
+
+                            "type":"string",
+
+                            "description":"Jira issue key"
+
+                        }
+
+                    },
+
+                    "required":[
+
+                        "issue_key"
+
+                    ]
+
+                }
+
+            },
+
+
+            "class":"coded_tools.jira.jira_issue_tool.JiraIssueTool"
+
+        }
+
+    ]
+
+}

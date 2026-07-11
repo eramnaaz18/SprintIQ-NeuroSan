@@ -1,0 +1,200 @@
+{
+    include "../config/llm_config.hocon",
+
+    "tools":[
+
+        {
+            "name":"ReportingAgent",
+
+            "function": {
+
+                "description":"Creates final SprintIQ report.",
+
+                "parameters":{
+
+                    "type":"object",
+
+                    "properties":{
+
+                        "issue_key":{
+
+                            "type":"string",
+
+                            "description":"Jira issue key"
+
+                        },
+
+                        "story_analysis":{
+
+                            "type":"string",
+
+                            "description":"Output from StoryAnalysisAgent"
+
+                        },
+
+                        "historical_analysis":{
+
+                            "type":"string",
+
+                            "description":"Output from HistoricalAgent"
+
+                        },
+
+                        "estimation":{
+
+                            "type":"string",
+
+                            "description":"Output from EstimationAgent"
+
+                        },
+
+                        "risks":{
+
+                            "type":"string",
+
+                            "description":"Output from RiskAgent"
+
+                        },
+
+                        "evaluation":{
+
+                            "type":"string",
+
+                            "description":"Output from EvaluationAgent"
+
+                        },
+
+                        "report_type":{
+
+                            "type":"string",
+
+                            "description":"Report format such as summary, scrum report, excel"
+
+                        }
+
+                    },
+
+
+                    "required":[
+
+                        "issue_key",
+                        "story_analysis"
+
+                    ]
+
+                }
+
+            },
+
+
+            "instructions":"""
+
+You are SprintIQ Reporting Agent.
+
+
+==================================================
+INPUT HANDLING
+==================================================
+
+
+You receive:
+
+
+{
+  "issue_key":"",
+  "story_analysis":{},
+  "historical_analysis":{},
+  "estimation":{},
+  "risks":{},
+  "evaluation":{},
+  "report_type":""
+}
+
+
+
+Validate required inputs.
+
+
+
+If issue_key or story_analysis is missing:
+
+
+Return:
+
+
+{
+  "summary":"Unable to generate report.",
+  "analysis":{},
+  "estimate":{},
+  "risks":[],
+  "recommendations":[
+    "Missing required analysis inputs"
+  ]
+}
+
+
+
+==================================================
+REPORT GENERATION
+==================================================
+
+
+Combine previous agent outputs into a structured SprintIQ report.
+
+
+
+Include:
+
+
+- Story summary
+- Business analysis findings
+- Historical context
+- Estimation details
+- Risk summary
+- Evaluation findings
+- Recommendations
+
+
+
+==================================================
+RULES
+==================================================
+
+
+Do not:
+
+- Create new analysis
+- Change estimation values
+- Invent risks
+- Modify Jira data
+
+
+
+Only consolidate existing agent outputs.
+
+
+
+==================================================
+OUTPUT
+==================================================
+
+
+Return JSON only:
+
+
+{
+  "summary":"",
+  "analysis":{},
+  "estimate":{},
+  "risks":[],
+  "recommendations":[]
+}
+
+
+"""
+
+        }
+
+    ]
+
+}

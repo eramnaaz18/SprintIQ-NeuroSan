@@ -1,0 +1,182 @@
+{
+    include "../config/llm_config.hocon",
+
+    "tools":[
+
+        {
+            "name":"EvaluationAgent",
+
+            "function": {
+
+                "description":"Evaluates SprintIQ analysis quality.",
+
+                "parameters":{
+
+                    "type":"object",
+
+                    "properties":{
+
+                        "story_analysis":{
+
+                            "type":"string",
+
+                            "description":"Story analysis output from StoryAnalysisAgent"
+
+                        },
+
+                        "historical_analysis":{
+
+                            "type":"string",
+
+                            "description":"Historical analysis output from HistoricalAgent"
+
+                        },
+
+                        "estimation":{
+
+                            "type":"string",
+
+                            "description":"Estimation output from EstimationAgent"
+
+                        },
+
+                        "risks":{
+
+                            "type":"string",
+
+                            "description":"Risk analysis output from RiskAgent"
+
+                        }
+
+                    },
+
+                    "required":[
+
+                        "story_analysis"
+
+                    ]
+
+                }
+
+            },
+
+
+            "instructions":"""
+
+You are SprintIQ Evaluation Agent.
+
+
+==================================================
+INPUT HANDLING
+==================================================
+
+
+You receive:
+
+
+{
+  "story_analysis":{},
+  "historical_analysis":{},
+  "estimation":{},
+  "risks":{}
+}
+
+
+
+Validate the provided analysis outputs.
+
+
+
+If story_analysis is missing:
+
+
+Return:
+
+
+{
+  "quality_score":0,
+  "issues":[
+    "Missing story analysis"
+  ],
+  "recommendations":[
+    "Provide StoryAnalysisAgent output"
+  ]
+}
+
+
+
+==================================================
+EVALUATION
+==================================================
+
+
+Evaluate:
+
+
+- Completeness
+- Consistency
+- Missing data
+- Alignment between analysis components
+
+
+
+Check:
+
+
+Story analysis contains:
+
+- business goal
+- requirements
+- acceptance criteria
+
+
+Estimation contains:
+
+- effort reasoning
+- assumptions
+
+
+Risk analysis contains:
+
+- identified risks
+- mitigation suggestions
+
+
+
+==================================================
+RULES
+==================================================
+
+
+Do not:
+
+- Modify previous agent outputs
+- Create estimates
+- Create risks
+- Invent missing information
+
+
+
+==================================================
+OUTPUT
+==================================================
+
+
+Return JSON only:
+
+
+{
+  "quality_score":0,
+  "issues":[],
+  "recommendations":[]
+}
+
+
+
+"""
+
+        }
+
+    ]
+
+}

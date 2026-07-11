@@ -1,0 +1,214 @@
+{
+  include "../config/llm_config.hocon",
+
+  "tools":[
+
+
+    {
+      "name":"StoryAnalysisAgent",
+
+      "function": {
+
+        "description":"Analyzes Jira stories and extracts structured business requirements.",
+
+        "parameters":{
+
+          "type":"object",
+
+          "properties":{
+
+            "issue_key":{
+
+              "type":"string",
+
+              "description":"Jira issue key such as ESS-11"
+
+            }
+
+          },
+
+          "required":[
+
+            "issue_key"
+
+          ]
+
+        }
+
+      },
+
+
+      "instructions":"""
+
+You are SprintIQ Story Analysis Agent.
+
+ROLE:
+You are a Senior Business Analyst.
+
+
+Your responsibility:
+
+Analyze Jira user stories.
+
+
+
+==================================================
+INPUT HANDLING
+==================================================
+
+
+You receive:
+
+
+{
+  "issue_key":"ESS-11"
+}
+
+
+Extract issue_key.
+
+
+If issue_key is missing:
+
+
+Return:
+
+
+{
+  "error":"Missing issue_key"
+}
+
+
+Do not continue without issue_key.
+
+
+
+==================================================
+MANDATORY ACTION
+==================================================
+
+
+Always call JiraIssueTool first.
+
+
+Input:
+
+
+{
+  "issue_key":"<issue_key>"
+}
+
+
+
+Wait for Jira response.
+
+
+Never create analysis without Jira data.
+
+
+
+==================================================
+ANALYSIS
+==================================================
+
+
+Analyze Jira response:
+
+
+- Business goal
+- Functional requirements
+- Non functional requirements
+- Acceptance criteria
+- Dependencies
+- Constraints
+- Missing information
+- Assumptions
+
+
+
+==================================================
+OUTPUT
+==================================================
+
+
+Return JSON only.
+
+
+{
+  "issue_key":"",
+  "executive_summary":"",
+  "business_goal":"",
+  "user_persona":"",
+  "functional_requirements":[],
+  "non_functional_requirements":[],
+  "acceptance_criteria":[],
+  "dependencies":[],
+  "constraints":[],
+  "assumptions":[],
+  "missing_information":[],
+  "questions_for_bsa":[]
+}
+
+
+
+Never estimate.
+
+Never identify risks.
+
+
+
+""",
+
+
+      "tools":[
+
+        "JiraIssueTool"
+
+      ]
+
+    },
+
+
+
+    {
+      "name":"JiraIssueTool",
+
+      "function":{
+
+        "description":"Fetch Jira issue details",
+
+        "parameters":{
+
+          "type":"object",
+
+          "properties":{
+
+            "issue_key":{
+
+              "type":"string",
+
+              "description":"Jira issue key"
+
+            }
+
+          },
+
+          "required":[
+
+            "issue_key"
+
+          ]
+
+        }
+
+      },
+
+
+      "class":"coded_tools.jira.jira_issue_tool.JiraIssueTool"
+
+    }
+
+
+  ]
+
+}

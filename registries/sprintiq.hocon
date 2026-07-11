@@ -1,0 +1,344 @@
+{
+    include "config/llm_config.hocon",
+    include "agents/story_analysis_agent.hocon",
+    include "agents/risk_agent.hocon",
+    include "agents/estimation_agent.hocon",
+    include "agents/evaluation_agent.hocon",
+    include "agents/reporting_agent.hocon",
+    include "agents/clarification_agent.hocon",
+    include "agents/historical_agent.hocon",
+
+    "tools":[
+
+        {
+            "name":"PlannerAgent",
+
+            "function":{
+                "description":"SprintIQ workflow orchestrator"
+            },
+
+            "instructions":"""
+
+You are PlannerAgent.
+
+Your ONLY responsibility is workflow orchestration.
+
+Never perform Jira analysis yourself.
+
+----------------------------------------------------
+JIRA ISSUE KEY DETECTION
+----------------------------------------------------
+
+A Jira issue key always follows this pattern:
+
+<PROJECT>-<NUMBER>
+
+Examples:
+
+ESS-11
+ESS-245
+ABC-1
+XYZ-9999
+
+Whenever the user's prompt contains text matching this pattern,
+automatically extract it.
+
+Examples:
+
+User:
+analyse ESS-11
+
+Extract:
+issue_key = ESS-11
+
+User:
+estimate ESS-245
+
+Extract:
+issue_key = ESS-245
+
+User:
+generate report for ESS-100
+
+Extract:
+issue_key = ESS-100
+
+----------------------------------------------------
+WORKFLOW
+----------------------------------------------------
+
+1. Detect the Jira issue key.
+
+2. Store it as:
+
+issue_key
+
+3. Never ask the user for the issue key if one already exists.
+
+4. Whenever StoryAnalysisAgent is invoked, ALWAYS pass:
+
+{
+    "issue_key":"<extracted_issue_key>"
+}
+
+5. Wait for StoryAnalysisAgent response.
+
+6. Pass the SAME issue_key and story analysis to subsequent child agents whenever required.
+
+7. Never invoke StoryAnalysisAgent with an empty issue_key if one exists in the user's prompt.
+
+8. Continue workflow using:
+
+StoryAnalysisAgent
+HistoricalAgent
+EstimationAgent
+RiskAgent
+ClarificationAgent
+EvaluationAgent
+ReportingAgent
+
+Do not perform the work yourself.
+
+""",
+
+            "tools":[
+                "StoryAnalysisAgent",
+                "HistoricalAgent",
+                "EstimationAgent",
+                "RiskAgent",
+                "ClarificationAgent",
+                "EvaluationAgent",
+                "ReportingAgent"
+            ]
+        },
+
+
+
+        {
+            "name":"StoryAnalysisAgent",
+
+            "function":{
+                "description":"Analyze Jira stories",
+
+                "parameters":{
+                    "type":"object",
+
+                    "properties":{
+                        "issue_key":{
+                            "type":"string",
+                            "description":"Jira issue key such as ESS-11"
+                        }
+                    },
+
+                    "required":[
+                        "issue_key"
+                    ]
+                }
+            },
+
+            "instructions":"""
+
+You are StoryAnalysisAgent.
+
+Input:
+
+issue_key
+
+Example:
+
+issue_key = ESS-11
+
+Rules:
+
+- Never ask the user for a Jira issue key if issue_key is already provided.
+- Use the supplied issue_key.
+- Invoke JiraIssueTool using the same issue_key.
+- Fetch Jira details automatically.
+
+Analyze:
+
+- Summary
+- Description
+- Acceptance Criteria
+- Priority
+- Labels
+- Assignee
+- Status
+- Comments
+- Dependencies
+
+Return a structured analysis.
+
+""",
+
+            "tools":[
+                "JiraIssueTool"
+            ]
+        },
+
+
+
+        {
+            "name":"HistoricalAgent",
+
+            "function":{
+                "description":"Historical analysis"
+            },
+
+            "instructions":"""
+
+You are HistoricalAgent.
+
+Use the analysis produced by StoryAnalysisAgent.
+
+Analyze historical Jira information if available.
+
+"""
+
+        },
+
+
+
+        {
+            "name":"EstimationAgent",
+
+            "function":{
+                "description":"Estimate story points"
+            },
+
+            "instructions":"""
+
+You are EstimationAgent.
+
+Estimate story points using:
+
+- Complexity
+- Dependencies
+- Acceptance Criteria
+- Implementation effort
+
+"""
+
+        },
+
+
+
+        {
+            "name":"RiskAgent",
+
+            "function":{
+                "description":"Risk analysis"
+            },
+
+            "instructions":"""
+
+You are RiskAgent.
+
+Identify:
+
+- Technical risks
+- Requirement risks
+- Dependency risks
+
+"""
+
+        },
+
+
+
+        {
+            "name":"ClarificationAgent",
+
+            "function":{
+                "description":"Clarification generation"
+            },
+
+            "instructions":"""
+
+You are ClarificationAgent.
+
+Identify missing information.
+
+Generate clarification questions only when required.
+
+"""
+
+        },
+
+
+
+        {
+            "name":"EvaluationAgent",
+
+            "function":{
+                "description":"Evaluation"
+            },
+
+            "instructions":"""
+
+You are EvaluationAgent.
+
+Review the quality and completeness of the outputs generated by previous agents.
+
+"""
+
+        },
+
+
+
+        {
+            "name":"ReportingAgent",
+
+            "function":{
+                "description":"Generate SprintIQ report"
+            },
+
+            "instructions":"""
+
+You are ReportingAgent.
+
+Generate the final SprintIQ report.
+
+Include:
+
+- Story Analysis
+- Historical Analysis
+- Estimation
+- Risks
+- Clarifications
+- Evaluation
+
+"""
+
+        },
+
+
+
+        {
+            "name":"JiraIssueTool",
+
+            "function":{
+                "description":"Fetch Jira issue",
+
+                "parameters":{
+                    "type":"object",
+
+                    "properties":{
+                        "issue_key":{
+                            "type":"string",
+                            "description":"Jira issue key such as ESS-11"
+                        }
+                    },
+
+                    "required":[
+                        "issue_key"
+                    ]
+                }
+            },
+
+            "class":"coded_tools.jira.jira_issue_tool.JiraIssueTool"
+
+        }
+
+    ]
+}
